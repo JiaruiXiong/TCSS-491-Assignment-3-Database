@@ -12,7 +12,8 @@ window.onload = function () {
   saveButton.onclick = function () {
     console.log("save");
     text.innerHTML = "Saved."
-    socket.emit("save", { studentname: "Chris Marriott", statename: "aState", data: "Goodbye World" }); //save format
+    // io.sockets[0].emit();  
+    socket.emit("save", { studentname: "Chris Marriott", statename: "aState", data: "Goodbye World" }); //save format // blockcast 
   };
 
   loadButton.onclick = function () {
@@ -21,4 +22,20 @@ window.onload = function () {
     socket.emit("load", { studentname: "Chris Marriott", statename: "aState" });
   };
 
+  // // 我加的
+  // socket.on("connect", function() {
+  //   console.log("Connected");
+  // })
+
+  // socket.emit("mesasge",);
+
 };
+
+
+
+
+
+
+
+
+

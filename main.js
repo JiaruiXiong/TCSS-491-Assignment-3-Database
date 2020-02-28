@@ -33,12 +33,15 @@ Background.prototype.update = function () {
 
 
 // GameLife class
-function GameLife(game,width, height) {
-    this.width = width;
-    this.height = height;
+function GameLife(game,cols, rows,resolution) {
+    // this.width = width;
+    // this.height = height;
     this.resolution = 10;
-    this.cols = this.width / this.resolution;
-    this.rows = this.height/ this.resolution;
+    // this.cols = this.width / this.resolution;
+    // this.rows = this.height/ this.resolution;
+
+    this.cols = cols;
+    this.rows = rows;
     
     this.grid = make2DArray(this.cols, this.rows);
 
@@ -65,6 +68,7 @@ function GameLife(game,width, height) {
     // this.grid = makeRandom(this.cols, this.rows);
     this.game = game;
     this.ctx = game.ctx;
+    // console.log(this.game.list);
 }
 
 GameLife.prototype.draw = function () {
@@ -184,17 +188,23 @@ GameLife.prototype.update = function () {
         }
         this.grid = next;
     }
+
+
+    
     
     if (gosperGun) {
-        this.grid = makeGosperGliderGun(this.cols, this.rows);
+        // this.grid = makeGosperGliderGun(this.cols, this.rows);
+        this.grid = this.game.list.myList[0];
         gosperGun = false;
     }
     else if (simkinGun) {
-        this.grid = makeSimkinGliderGun(this.cols, this.rows);
+        // this.grid = makeSimkinGliderGun(this.cols, this.rows);
+        this.grid = this.game.list.myList[1];
         simkinGun = false;
     }
     else if (pulsar) {
-        this.grid = makePulsar(this.cols,this.rows);
+        // this.grid = makePulsar(this.cols,this.rows);
+        this.grid = this.game.list.myList[2]
         pulsar = false;
     }
     else if (random) {
@@ -202,7 +212,8 @@ GameLife.prototype.update = function () {
         random = false;
     }
     else if (other) {
-        this.grid = makeOther(this.cols, this.rows);
+        // this.grid = makeOther(this.cols, this.rows);
+        this.grid = this.game.list.myList[3];
         other = false;
     }
 
@@ -794,13 +805,13 @@ function makeOther(cols, rows) {
               
         }
       }
-    console.log(grid);
+    // console.log(grid);
     return grid;
 }
 
 
 
-
+// Don't do that!!! copy from console of the grid. 
 //         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 // 1: (60) [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 // 2: (60) [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -884,30 +895,19 @@ function makeOther(cols, rows) {
 
 
 
-// AM.queueDownload("./img/mushroomdude.png");
-
-
-// AM.downloadAll(function () {
-//     var canvas = document.getElementById("gameWorld");
-//     var ctx = canvas.getContext("2d");
-
-//     var gameEngine = new GameEngine();
-//     gameEngine.init(ctx);
-//     gameEngine.start();
-
-//     gameEngine.addEntity(new Background(gameEngine));
-//     gameEngine.addEntity(new GameLife(gameEngine,canvas.width, canvas.height));
-
-
-//     //gameEngine.addEntity(new Guy(gameEngine, AM.getAsset("./img/RobotUnicorn.png")));
-
-//     console.log("All Done!");
-// });
-
 window.onload = function () {
     var socket = io.connect("http://24.16.255.56:8888");  // connect to database
-  
-  
+
+    // below three method were copied from ppt.
+    socket.on("connect", function () {        
+        console.log("Socket connected.")    
+    });    
+    socket.on("disconnect", function () {
+        console.log("Socket disconnected.")    
+    });    
+    socket.on("reconnect", function () {        
+        console.log("Socket reconnected.")    
+    });
   
     var text = document.getElementById("text");
     var saveButton = document.getElementById("save");
@@ -917,20 +917,21 @@ window.onload = function () {
       console.log("save");
       text.innerHTML = "Saved."
       // io.sockets[0].emit();  
-      socket.emit("save", { studentname: "Jiarui Xiong", statename: "Assignment 3 Jiarui Xiong", data: "Goodbye World" }); //save format // blockcast 
+      socket.emit("save", { studentname: "Jiarui Xiong", statename: "Assignment 3 Jiarui Xiong", data: gameEngine.list });
+    //   socket.emit("save", { studentname: "Jiarui Xiong", statename: "Assignment 3 Jiarui Xiong", data: "Goodbye World" }); //save format // blockcast 
     };
   
     loadButton.onclick = function () {
       console.log("load");
       text.innerHTML = "Loaded."
-      socket.emit("load", { studentname: "Chris Marriott", statename: "Assignment 3 Jiarui Xiong" });
+      socket.emit("load", { studentname: "Jiarui Xiong", statename: "Assignment 3 Jiarui Xiong" });
     };
 
     socket.on("load", function (data) {
-        
+        gameEngine.list = data.data;
         console.log(data);
     });
-    
+
 
   
     var canvas = document.getElementById("gameWorld");
@@ -940,8 +941,30 @@ window.onload = function () {
     gameEngine.init(ctx);
     gameEngine.start();
 
+
+
+
+    var resolution = 10;
+    var cols = canvas.width / resolution;
+    var rows = canvas.height/ resolution;
+    var storage = [];
+    var glider = this.makeGosperGliderGun(cols, rows);
+    storage.push(glider);
+
+    var simkin = this.makeSimkinGliderGun(cols, rows);
+    storage.push(simkin);
+
+    var pulsar = this.makePulsar(cols,rows);
+    storage.push(pulsar);
+
+    var other = this.makeOther(cols, rows);
+    storage.push(other)
+    // console.log(glider);
+    gameEngine.list = {resolution:resolution, myList: storage};
+
+    // gameEngine.array.push();
     gameEngine.addEntity(new Background(gameEngine));
-    gameEngine.addEntity(new GameLife(gameEngine,canvas.width, canvas.height));
+    gameEngine.addEntity(new GameLife(gameEngine,cols, rows,resolution));
 
 
     //gameEngine.addEntity(new Guy(gameEngine, AM.getAsset("./img/RobotUnicorn.png")));
@@ -952,137 +975,3 @@ window.onload = function () {
     // socket.emit("mesasge",);
   
   };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// 狗熊做的 Gosper Glider Gun
-
-    //randomize 0 or 1 in the grid
-    // for (let i = 0; i < this.cols; i++) {
-    //     for (let j = 0; j < this.rows; j++) {
-    //         if (    // 2*2 left square
-    //                 (i === 40 && j === 5)
-    //             ||  (i === 41 && j === 5)
-    //             ||  (i === 40 && j === 6)
-    //             ||  (i === 41 && j === 6)
-
-    //                 // second part of glider gun
-    //             ||  (i === 51 && j === 3)
-    //             ||  (i === 51 && j === 4)
-    //             ||  (i === 51 && j === 8)
-    //             ||  (i === 51 && j === 9)
-    //             ||  (i === 53 && j === 4)
-    //             ||  (i === 53 && j === 8)
-    //             ||  (i === 54 && j === 5)
-    //             ||  (i === 54 && j === 6)
-    //             ||  (i === 54 && j === 7)
-    //             ||  (i === 55 && j === 5)
-    //             ||  (i === 55 && j === 6)
-    //             ||  (i === 55 && j === 7)
-                
-    //             // third part of glider gun
-    //             ||  (i === 58 && j === 8)
-    //             ||  (i === 59 && j === 7)
-    //             ||  (i === 59 && j === 8)
-    //             ||  (i === 59 && j === 9)
-    //             ||  (i === 60 && j === 6)
-    //             ||  (i === 60 && j === 10)
-    //             ||  (i === 61 && j === 8)
-    //             ||  (i === 62 && j === 5) 
-    //             ||  (i === 63 && j === 5) 
-    //             ||  (i === 62 && j === 11)
-    //             ||  (i === 63 && j === 11)
-    //             ||  (i === 64 && j === 6)
-    //             ||  (i === 64 && j === 10)
-    //             ||  (i === 65 && j === 7)
-    //             ||  (i === 65 && j === 8) 
-    //             ||  (i === 65 && j === 9)
-
-    //             // fourth part of glider gun
-    //             ||  (i === 74 && j === 7) 
-    //             ||  (i === 74 && j === 8) 
-    //             ||  (i === 75 && j === 7) 
-    //             ||  (i === 75 && j === 8) 
-
-    //             // second gun
-    //             ||  (i === 1 && j === 5)
-    //             ||  (i === 2 && j === 5)
-    //             ||  (i === 1 && j === 6)
-    //             ||  (i === 2 && j === 6)
-
-    //                 // second part of 2nd glider gun
-    //             ||  (i === 11 && j === 5)
-    //             ||  (i === 11 && j === 6)
-    //             ||  (i === 11 && j === 7)
-    //             ||  (i === 12 && j === 4)
-    //             ||  (i === 12 && j === 8)
-    //             ||  (i === 13 && j === 3)
-    //             ||  (i === 14 && j === 3)
-    //             ||  (i === 13 && j === 9)
-    //             ||  (i === 14 && j === 9)
-    //             ||  (i === 15 && j === 6)
-    //             ||  (i === 16 && j === 4)
-    //             ||  (i === 16 && j === 8)
-    //             ||  (i === 17 && j === 5)
-    //             ||  (i === 17 && j === 6)
-    //             ||  (i === 17 && j === 7)
-    //             ||  (i === 18 && j === 6)
-
-                
-    //             // third part of 2nd glider gun
-    //             ||  (i === 21 && j === 5)
-    //             ||  (i === 21 && j === 4)
-    //             ||  (i === 21 && j === 3)
-    //             ||  (i === 22 && j === 5)
-    //             ||  (i === 22 && j === 4)
-    //             ||  (i === 22 && j === 3)
-    //             ||  (i === 23 && j === 2)
-    //             ||  (i === 23 && j === 6) 
-    //             ||  (i === 25 && j === 1) 
-    //             ||  (i === 25 && j === 2)
-    //             ||  (i === 25 && j === 6)
-    //             ||  (i === 25 && j === 7)
-    
-
-    //             // fourth part of 2nd glider gun
-    //             ||  (i === 35 && j === 3) 
-    //             ||  (i === 35 && j === 4) 
-    //             ||  (i === 36 && j === 3) 
-    //             ||  (i === 36 && j === 4) 
-
-
-                
-    //             ) {
-    //                 this.grid[i][j] = 1;
-
-    //         }
-    //         else {
-    //             this.grid[i][j] = 0;
-    //         }
-    //         // this.grid[i][j] =1//Math.floor(Math.random() * 2);
-    //     }
-    // }
-
-
-
-
-
-
-
-
-

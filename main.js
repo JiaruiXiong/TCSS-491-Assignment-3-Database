@@ -893,10 +893,10 @@ function makeOther(cols, rows) {
 // 78: (60) [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 // 79: (60) [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-
+var socket = io.connect("http://24.16.255.56:8888");  // connect to database
 
 window.onload = function () {
-    var socket = io.connect("http://24.16.255.56:8888");  // connect to database
+    // var socket = io.connect("http://24.16.255.56:8888");  // connect to database
 
     // below three method were copied from ppt.
     socket.on("connect", function () {        

@@ -33,10 +33,10 @@ Background.prototype.update = function () {
 
 
 // GameLife class
-function GameLife(game,cols, rows,resolution) {
+function GameLife(game,cols,rows,resolution) {
     // this.width = width;
     // this.height = height;
-    this.resolution = 10;
+    this.resolution = resolution;
     // this.cols = this.width / this.resolution;
     // this.rows = this.height/ this.resolution;
 
@@ -68,6 +68,7 @@ function GameLife(game,cols, rows,resolution) {
     // this.grid = makeRandom(this.cols, this.rows);
     this.game = game;
     this.ctx = game.ctx;
+    this.index = -1;
     // console.log(this.game.list);
 }
 
@@ -172,13 +173,13 @@ GameLife.prototype.update = function () {
             for (let j = 0; j < this.rows; j++) {
               let state = this.grid[i][j];
             //   console.log(state);
-              let neighbors = countNeighbors(this.grid, i, j,this.cols, this.rows);
+              let neighbors = countNeighbors(this.grid, i, j, this.cols, this.rows);
               if (state === 0 && neighbors  === 3) {
                 // console.log("haha: "+i,j);
                 next[i][j] = 1;
              
               }
-              else if ( state === 1 && (neighbors <2 || neighbors > 3)) {
+              else if ( state === 1 && (neighbors < 2 || neighbors > 3)) {
                 next[i][j] = 0;
               }
               else {
@@ -186,8 +187,16 @@ GameLife.prototype.update = function () {
               } 
             } 
         }
+
         this.grid = next;
     }
+
+    // for (let i = 0; i < this.game.list.myList.length; i++){
+    //     if (this.index == i){
+    //         console.log("I changed.");
+    //         this.game.list.myList[i] = this.grid;
+    //     }
+    // }
 
 
     
@@ -196,25 +205,32 @@ GameLife.prototype.update = function () {
         // this.grid = makeGosperGliderGun(this.cols, this.rows);
         this.grid = this.game.list.myList[0];
         gosperGun = false;
+        this.index = 0;
+        // console.log();
     }
     else if (simkinGun) {
         // this.grid = makeSimkinGliderGun(this.cols, this.rows);
         this.grid = this.game.list.myList[1];
         simkinGun = false;
+        this.index = 1;
     }
     else if (pulsar) {
         // this.grid = makePulsar(this.cols,this.rows);
         this.grid = this.game.list.myList[2]
         pulsar = false;
+        this.index = 2
     }
     else if (random) {
-        this.grid = makeRandom(this.cols, this.rows);
+        this.grid = this.game.list.myList[4];
+        // this.grid = makeRandom(this.cols, this.rows);
         random = false;
+        this.index = 4;
     }
     else if (other) {
         // this.grid = makeOther(this.cols, this.rows);
         this.grid = this.game.list.myList[3];
         other = false;
+        this.index = 3;
     }
 
     if (clean) {
@@ -466,7 +482,7 @@ function makeSimkinGliderGun(cols,rows){
                     grid[i][j] = 1;
             }
             else{
-                grid[i][j] =0;
+                grid[i][j] = 0;
             }
         }
     }
@@ -916,7 +932,13 @@ window.onload = function () {
     saveButton.onclick = function () {
       console.log("save");
       text.innerHTML = "Saved."
+    //   console.log(gameEngine.entities[1].index);
+    if (gameEngine.entities[1].index >= 0) {
+        gameEngine.list.myList[gameEngine.entities[1].index] = gameEngine.entities[1].grid;
+    }
+      
       // io.sockets[0].emit();  
+    //   console.log(gameEngine.list.myList[2]);
       socket.emit("save", { studentname: "Jiarui Xiong", statename: "Assignment 3 Jiarui Xiong", data: gameEngine.list });
     //   socket.emit("save", { studentname: "Jiarui Xiong", statename: "Assignment 3 Jiarui Xiong", data: "Goodbye World" }); //save format // blockcast 
     };
@@ -924,12 +946,15 @@ window.onload = function () {
     loadButton.onclick = function () {
       console.log("load");
       text.innerHTML = "Loaded."
+    //   this.grid = this.game.list.myList[i];
+
       socket.emit("load", { studentname: "Jiarui Xiong", statename: "Assignment 3 Jiarui Xiong" });
     };
 
     socket.on("load", function (data) {
         gameEngine.list = data.data;
-        console.log(data);
+        gameEngine.entities[1].grid = gameEngine.list.myList[gameEngine.entities[1].index];
+        // console.log(gameEngine.list.myList);
     });
 
 
@@ -941,6 +966,7 @@ window.onload = function () {
     gameEngine.init(ctx);
     gameEngine.start();
 
+    gameEngine.list = {};
 
 
 
@@ -958,11 +984,16 @@ window.onload = function () {
     storage.push(pulsar);
 
     var other = this.makeOther(cols, rows);
+
     storage.push(other)
+
+    var random = this.makeRandom(cols,rows);
+    storage.push(random);
     // console.log(glider);
     gameEngine.list = {resolution:resolution, myList: storage};
 
     // gameEngine.array.push();
+    console.log(gameEngine.list)
     gameEngine.addEntity(new Background(gameEngine));
     gameEngine.addEntity(new GameLife(gameEngine,cols, rows,resolution));
 
